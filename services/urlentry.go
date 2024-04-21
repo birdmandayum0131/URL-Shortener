@@ -8,16 +8,11 @@ import (
 
 //TODO: refactor error handling code snippets to a package
 
-// Interface that can generate a short url from a long url
-type Shortener interface {
-	GenerateShortURL(longURL string) (string, error)
-}
-
 // Class that doing CRUD operation to url entries
 type URLEntryInteractor struct {
 	URLRepository domain.URLRepository
 	Logger        Logger
-	URLShortener  Shortener
+	HashGenerator domain.HashGenerator
 }
 
 // Find the original url that corresponding to.
@@ -62,24 +57,20 @@ func (interactor *URLEntryInteractor) CreateEntry(longURL string) (string, error
 		interactor.Logger.Log(msg)
 		return entry.ShortURL, nil
 	} else {
-		shortURL, err := interactor.URLShortener.GenerateShortURL(longURL)
-		if err != nil {
-			interactor.Logger.Log(err.Error())
-			return "", err
-		}
+		hash := interactor.HashGenerator.GenerateHash()
 
 		// * check url is llegal
-		if len(shortURL) > 7 {
+		if len(hash) > 7 {
 			interactor.Logger.Log("Expected url shorter than 7 characters, check status of url shortener")
 		}
 
-		entry := domain.URLEntry{ShortURL: shortURL, LongURL: longURL}
+		entry := domain.URLEntry{ShortURL: hash, LongURL: longURL}
 		err = interactor.URLRepository.Store(entry)
 		if err != nil {
 			interactor.Logger.Log(err.Error())
 			return "", err
 		}
 
-		return shortURL, nil
+		return hash, nil
 	}
 }
