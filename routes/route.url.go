@@ -7,8 +7,8 @@ import (
 )
 
 // Initialize route for CRUD operation of url shorten
-func InitUrlRoutes(route *gin.Engine) {
+func InitUrlRoutes(route *gin.Engine, handler *handlers.URLHandler) {
 	groupRoute := route.Group("/api/v1")
-	groupRoute.POST("/url/shorten", handlers.CreateUrlHandler)
-	groupRoute.GET("/url/:hash", handlers.GetUrlHandler)
+	groupRoute.POST("/url/shorten", handler.CreateURLHandler)
+	groupRoute.GET("/url/:hash", handler.GetURLHandler)
 }
