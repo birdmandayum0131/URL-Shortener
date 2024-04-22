@@ -12,7 +12,7 @@ import (
 
 type MySQLURLDBHandler struct {
 	Conn   *sqlx.DB
-	logger Logger
+	Logger Logger
 }
 
 // Implmentation of URL insert operation
@@ -28,7 +28,7 @@ INSERT INTO url (shortURL, longURL)
 VALUES (:shortURL, :longURL)`
 	_, err := dbHandler.Conn.NamedExec(sqlStatement, newEntry)
 	if err != nil {
-		dbHandler.logger.Log(err.Error())
+		dbHandler.Logger.Log(err.Error())
 		return err
 	}
 	return nil
@@ -60,7 +60,7 @@ func (dbHandler *MySQLURLDBHandler) Query(query models.URLEntry) (models.URLEntr
 
 	results, err := dbHandler.Conn.Queryx(fmt.Sprintf("SELECT id, shortURL, longURL FROM url WHERE %s", filterString))
 	if err != nil {
-		dbHandler.logger.Log(err.Error())
+		dbHandler.Logger.Log(err.Error())
 		return models.URLEntry{}, err
 	}
 

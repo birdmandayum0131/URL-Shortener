@@ -11,8 +11,8 @@ type URLDBHandler interface {
 
 // class that act as a interface between application and database
 type URLRepository struct {
-	dbHandler URLDBHandler
-	logger    Logger
+	DBHandler URLDBHandler
+	Logger    Logger
 }
 
 // store url entry into database
@@ -22,9 +22,9 @@ func (repo *URLRepository) Store(urlEntry domain.URLEntry) error {
 		LongURL:  urlEntry.LongURL,
 	}
 
-	err := repo.dbHandler.Insert(entry)
+	err := repo.DBHandler.Insert(entry)
 	if err != nil {
-		repo.logger.Log(err.Error())
+		repo.Logger.Log(err.Error())
 		return err
 	}
 	return nil
@@ -37,9 +37,9 @@ func (repo *URLRepository) Get(query domain.URLEntry) (domain.URLEntry, error) {
 		LongURL:  query.LongURL,
 	}
 
-	result, err := repo.dbHandler.Query(queryModel)
+	result, err := repo.DBHandler.Query(queryModel)
 	if err != nil {
-		repo.logger.Log(err.Error())
+		repo.Logger.Log(err.Error())
 		return domain.URLEntry{}, err
 	}
 
