@@ -24,7 +24,7 @@ func (dbHandler *MySQLURLDBHandler) Insert(entry models.URLEntry) error {
 	}
 	// TODO: refactor the sql staement to other place
 	sqlStatement := `
-INSERT INTO url (shortURL, longURL)
+INSERT INTO urlmappings (shortURL, longURL)
 VALUES (:shortURL, :longURL)`
 	_, err := dbHandler.Conn.NamedExec(sqlStatement, newEntry)
 	if err != nil {
@@ -58,7 +58,7 @@ func (dbHandler *MySQLURLDBHandler) Query(query models.URLEntry) (models.URLEntr
 	// TODO: refactor the sql filter statement to other place
 	filterString := strings.Join(filterStrings, " AND ")
 
-	results, err := dbHandler.Conn.Queryx(fmt.Sprintf("SELECT id, shortURL, longURL FROM url WHERE %s", filterString))
+	results, err := dbHandler.Conn.Queryx(fmt.Sprintf("SELECT id, shortURL, longURL FROM urlmappings WHERE %s", filterString))
 	if err != nil {
 		dbHandler.Logger.Log(err.Error())
 		return models.URLEntry{}, err
