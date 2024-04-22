@@ -12,7 +12,7 @@ import (
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/jmoiron/sqlx"
 
-	handlers "shortener/handlers/url"
+	handlers "shortener/handlers"
 )
 
 func main() {

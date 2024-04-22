@@ -1,7 +1,7 @@
 package routes
 
 import (
-	handlers "shortener/handlers/url"
+	handlers "shortener/handlers"
 
 	"github.com/gin-gonic/gin"
 )
