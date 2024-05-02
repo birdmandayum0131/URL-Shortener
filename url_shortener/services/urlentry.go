@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"shortener/domain"
+	"logger"
 )
 
 //TODO: refactor error handling code snippets to a package
@@ -11,7 +12,7 @@ import (
 // Class that doing CRUD operation to url entries
 type URLEntryInteractor struct {
 	URLRepository domain.URLRepository
-	Logger        Logger
+	Logger        logger.Logger
 	HashGenerator domain.HashGenerator
 }
 
