@@ -1,7 +1,7 @@
 go 1.22.2
 
 use (
-	./core/logger
-	./core/snowflake
-	./url_shortener
+	./src/core/logger
+	./src/core/snowflake
+	./src/features/urlshortener
 )
