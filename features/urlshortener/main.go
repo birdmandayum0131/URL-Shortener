@@ -2,18 +2,18 @@ package main
 
 import (
 	"logger"
-	"shortener/domain"
-	"shortener/infrastructure"
-	"shortener/repositories"
-	"shortener/routes"
-	"shortener/services"
+	"urlshortener/domain"
+	"urlshortener/infrastructure"
+	"urlshortener/repositories"
+	"urlshortener/routes"
+	"urlshortener/services"
 
 	"github.com/bwmarrin/snowflake"
 	"github.com/gin-gonic/gin"
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/jmoiron/sqlx"
 
-	handlers "shortener/handlers"
+	handlers "urlshortener/handlers"
 )
 
 func main() {
@@ -35,7 +35,7 @@ func SetupRouter(handler *handlers.URLHandler) *gin.Engine {
 }
 
 func initDB() *sqlx.DB {
-	db, err := sqlx.Open("mysql", "shortener:shortener@tcp(localhost:3306)/url_shortener")
+	db, err := sqlx.Open("mysql", "urlshortener:shortener@tcp(localhost:3306)/url_shortener")
 	if err != nil {
 		panic(err.Error())
 	}

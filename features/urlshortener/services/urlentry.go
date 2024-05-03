@@ -3,7 +3,7 @@ package services
 import (
 	"errors"
 	"fmt"
-	"shortener/domain"
+	"urlshortener/domain"
 	"logger"
 )
 
