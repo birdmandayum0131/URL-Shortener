@@ -4,7 +4,7 @@ import (
 	"logger"
 	"urlshortener/domain"
 	"urlshortener/infrastructure"
-	"urlshortener/repositories"
+	"urlshortener/interfaces/repositories"
 	"urlshortener/interfaces/rest/routes"
 	"urlshortener/services"
 
