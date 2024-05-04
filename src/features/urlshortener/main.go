@@ -5,7 +5,7 @@ import (
 	"urlshortener/domain"
 	"urlshortener/infrastructure"
 	"urlshortener/repositories"
-	"urlshortener/routes"
+	"urlshortener/interfaces/rest/routes"
 	"urlshortener/services"
 
 	"github.com/bwmarrin/snowflake"
@@ -13,7 +13,7 @@ import (
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/jmoiron/sqlx"
 
-	handlers "urlshortener/handlers"
+	handlers "urlshortener/interfaces/rest/handlers"
 )
 
 func main() {
