@@ -3,7 +3,7 @@ package handlers
 import (
 	"logger"
 	"net/http"
-	schemas "urlshortener/schemas/api"
+	schemas "urlshortener/interfaces/schemas/api"
 	"urlshortener/services"
 
 	"github.com/gin-gonic/gin"

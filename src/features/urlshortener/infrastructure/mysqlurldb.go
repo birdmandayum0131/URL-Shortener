@@ -5,7 +5,7 @@ import (
 	"logger"
 	"reflect"
 	"urlshortener/interfaces/models"
-	"urlshortener/schemas"
+	"urlshortener/interfaces/schemas"
 	"strings"
 
 	"github.com/jmoiron/sqlx"
