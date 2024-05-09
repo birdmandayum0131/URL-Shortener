@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"logger"
 	"reflect"
-	"urlshortener/models"
+	"urlshortener/interfaces/models"
 	"urlshortener/schemas"
 	"strings"
 
