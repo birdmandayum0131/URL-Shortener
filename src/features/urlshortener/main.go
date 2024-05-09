@@ -35,7 +35,7 @@ func SetupRouter(handler *handlers.URLHandler) *gin.Engine {
 }
 
 func initDB() *sqlx.DB {
-	db, err := sqlx.Open("mysql", "urlshortener:shortener@tcp(localhost:3306)/url_shortener")
+	db, err := sqlx.Open("mysql", "root:password@tcp(localhost:3306)/url_shortener")
 	if err != nil {
 		panic(err.Error())
 	}
