@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"logger"
 	"reflect"
-	"urlshortener/models"
-	"urlshortener/schemas"
+	"urlshortener/interfaces/models"
+	"urlshortener/interfaces/schemas"
 	"strings"
 
 	"github.com/jmoiron/sqlx"

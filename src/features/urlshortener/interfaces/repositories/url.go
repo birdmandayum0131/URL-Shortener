@@ -3,7 +3,7 @@ package repositories
 import (
 	"logger"
 	"urlshortener/domain"
-	"urlshortener/models"
+	"urlshortener/interfaces/models"
 )
 
 // DB interface between framework and interface layer
