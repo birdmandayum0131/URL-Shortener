@@ -10,7 +10,7 @@ import (
 
 	"github.com/bwmarrin/snowflake"
 	"github.com/gin-gonic/gin"
-	_ "github.com/go-sql-driver/mysql"
+	"github.com/go-sql-driver/mysql"
 	"github.com/jmoiron/sqlx"
 
 	handlers "urlshortener/interfaces/rest/handlers"
@@ -25,7 +25,7 @@ func main() {
 	handler := initHandler(db, node)
 
 	app := SetupRouter(handler)
-	app.Run("localhost:8000")
+	app.Run("0.0.0.0:8000")
 }
 
 func SetupRouter(handler *handlers.URLHandler) *gin.Engine {
@@ -35,8 +35,20 @@ func SetupRouter(handler *handlers.URLHandler) *gin.Engine {
 }
 
 func initDB() *sqlx.DB {
-	db, err := sqlx.Open("mysql", "urlshortener:shortener@tcp(localhost:3306)/url_shortener")
+	db, err := sqlx.Open("mysql", "root:password@tcp(db:3306)/url_shortener")
 	if err != nil {
+		panic(err.Error())
+	}
+
+	var schema = `
+CREATE TABLE url_shortener.urlmappings (
+	id BIGINT NOT NULL AUTO_INCREMENT,
+	shortURL VARCHAR(64) NULL,
+	longURL VARCHAR(2048) NULL,
+	PRIMARY KEY (id))`
+
+	_, err = db.Exec(schema)
+	if err != nil && !(&mysql.MySQLError{Number: 1050}).Is(err) {
 		panic(err.Error())
 	}
 
