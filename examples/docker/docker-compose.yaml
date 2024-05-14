@@ -22,7 +22,7 @@ services:
     image: nginx #:stable-alpine3.19
     restart: always
     volumes:
-      - ./templates:/etc/nginx/templates
+      - ./nginx-templates:/etc/nginx/templates
     environment:
       - SERVER_DOMAIN=localhost
       - URLSHORTENER_SERVER=url-shortener:8000
