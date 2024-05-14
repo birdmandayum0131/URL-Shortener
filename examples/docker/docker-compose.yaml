@@ -8,8 +8,8 @@ services:
       dockerfile: ./docker/Dockerfile
     depends_on:
       - db
-    ports:
-      - 8000:8000
+    expose:
+      - 8000
   db:
     image: mysql
     restart: always
@@ -18,3 +18,15 @@ services:
       MYSQL_DATABASE: url_shortener
     expose:
       - 3306
+  nginx:
+    image: nginx #:stable-alpine3.19
+    restart: always
+    volumes:
+      - ./templates:/etc/nginx/templates
+    environment:
+      - SERVER_DOMAIN=localhost
+      - URLSHORTENER_SERVER=url-shortener:8000
+      - NGINX_PORT=80
+    ports:
+      - 80:80
+      - 443:443
