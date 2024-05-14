@@ -1,0 +1,15 @@
+server {
+    listen       80;
+    server_name  ${SERVER_DOMAIN};
+
+    location ~ "^/[a-zA-Z0-9]{1,7}$" {
+      if ($request_method = GET ) {
+        rewrite "^/([a-zA-Z0-9]{1,7})$" /api/v1/url/$1 break;
+      }
+      proxy_pass http://${URLSHORTENER_SERVER};
+    }
+
+    location ~/* {
+      proxy_pass http://${URLSHORTENER_SERVER};
+    }
+}
