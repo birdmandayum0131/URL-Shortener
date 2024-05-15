@@ -21,7 +21,7 @@ services:
     expose:
       - 3306
   nginx:
-    image: nginx #:stable-alpine3.19
+    image: nginx:stable-alpine3.19
     restart: always
     volumes:
       - ./nginx-templates:/etc/nginx/templates
@@ -32,7 +32,8 @@ services:
       - backend
     expose:
       - 80
+
 networks:
   default:
-    name: bardbird-network
+    name: ${GATEWAY_NETWORK:-bridge}
     external: true
