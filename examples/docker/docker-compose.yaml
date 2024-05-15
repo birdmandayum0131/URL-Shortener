@@ -26,8 +26,10 @@ services:
     volumes:
       - ./nginx-templates:/etc/nginx/templates
     environment:
-      - SERVER_DOMAIN=localhost
-      - URLSHORTENER_SERVER=url-shortener:8000
+      - PROXY_HOST=localhost
+      - BACKEND_HOST=backend:8000
+    depends_on:
+      - backend
     expose:
       - 80
 networks:
