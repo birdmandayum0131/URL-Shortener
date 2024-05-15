@@ -1,5 +1,7 @@
 server {
     listen       80;
+    listen       [::]:80;
+    
     server_name  ${SERVER_DOMAIN};
 
     location ~ "^/[a-zA-Z0-9]{1,7}$" {
@@ -9,7 +11,7 @@ server {
       proxy_pass http://${URLSHORTENER_SERVER};
     }
 
-    location ~/* {
+    location ~ /.+ {
       proxy_pass http://${URLSHORTENER_SERVER};
     }
 }
