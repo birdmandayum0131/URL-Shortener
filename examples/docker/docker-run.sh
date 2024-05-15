@@ -1,2 +1,2 @@
-docker system prune --all --force
+docker system prune -f
 docker compose -f ./examples/docker/docker-compose.yaml up -d --force-recreate #--build
