@@ -1,8 +1,10 @@
-version: '0.1'
+version: '0.2'
+name: url-shortener
 
 services:
-  url-shortener:
+  backend:
     image: url-shortener
+    restart: always
     build:
       context: ../..
       dockerfile: ./docker/Dockerfile
@@ -26,7 +28,9 @@ services:
     environment:
       - SERVER_DOMAIN=localhost
       - URLSHORTENER_SERVER=url-shortener:8000
-      - NGINX_PORT=80
-    ports:
-      - 80:80
-      - 443:443
+    expose:
+      - 80
+networks:
+  default:
+    name: bardbird-network
+    external: true
