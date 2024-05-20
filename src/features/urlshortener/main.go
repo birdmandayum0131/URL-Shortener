@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"logger"
 	"urlshortener/domain"
 	"urlshortener/infrastructure"
@@ -10,23 +11,43 @@ import (
 
 	"github.com/bwmarrin/snowflake"
 	"github.com/gin-gonic/gin"
-	"github.com/go-sql-driver/mysql"
+	_ "github.com/go-sql-driver/mysql"
 	"github.com/jmoiron/sqlx"
 
 	handlers "urlshortener/interfaces/rest/handlers"
 )
 
 func main() {
-	// TODO: remove these init in following refactor
-	db := initDB()
-	defer db.Close()
+	// TODO: refactor this to config file
+	dbConfig := infrastructure.DBConfig{
+		Host:     "db",
+		Port:     3306,
+		User:     "root",
+		Password: "password",
+		Database: "url_shortener",
+		Driver:   "mysql",
+	}
 
+	// * Initialize DB
+	dbHandler := initDB(dbConfig)
+	defer dbHandler.Conn.Close()
+
+	// * Initialize SnowFlake Node
 	node := initNode()
-	handler := initHandler(db, node)
 
+	// * Initialize restful handler
+	handler := createHandler(dbHandler, node)
+
+	// * Setup router
 	app := SetupRouter(handler)
-	app.Run("0.0.0.0:8000")
+
+	err := app.Run(":8000")
+	if err != nil {
+		panic(err.Error())
+	}
 }
+
+// TODO: maybe we can refactor these setup/init functions with better code style
 
 func SetupRouter(handler *handlers.URLHandler) *gin.Engine {
 	router := gin.Default()
@@ -34,26 +55,23 @@ func SetupRouter(handler *handlers.URLHandler) *gin.Engine {
 	return router
 }
 
-func initDB() *sqlx.DB {
-	db, err := sqlx.Open("mysql", "root:password@tcp(db:3306)/url_shortener")
+func initDB(config infrastructure.DBConfig) *infrastructure.MySQLURLDBHandler {
+	// * Connect to DB
+	dbSource := fmt.Sprintf("%s:%s@tcp(%s:%d)/%s", config.User, config.Password, config.Host, config.Port, config.Database)
+	db, err := sqlx.Open(config.Driver, dbSource)
 	if err != nil {
 		panic(err.Error())
 	}
 
-	var schema = `
-CREATE TABLE url_shortener.urlmappings (
-	id BIGINT NOT NULL AUTO_INCREMENT,
-	shortURL VARCHAR(64) NULL,
-	longURL VARCHAR(2048) NULL,
-	PRIMARY KEY (id))`
-
-	_, err = db.Exec(schema)
-	if err != nil && !(&mysql.MySQLError{Number: 1050}).Is(err) {
-		panic(err.Error())
+	// * Create tables
+	dbHandler := &infrastructure.MySQLURLDBHandler{
+		Conn:   db,
+		Logger: &logger.SimpleStdLogger{},
 	}
+	dbHandler.Init()
 
 	println("Success to connect to MySQL!")
-	return db
+	return dbHandler
 }
 
 func initNode() *snowflake.Node {
@@ -64,15 +82,12 @@ func initNode() *snowflake.Node {
 	return node
 }
 
-func initHandler(db *sqlx.DB, node *snowflake.Node) *handlers.URLHandler {
+func createHandler(dbHandler repositories.URLDBHandler, node *snowflake.Node) *handlers.URLHandler {
 	return &handlers.URLHandler{
 		URLInteractor: services.URLEntryInteractor{
 			URLRepository: &repositories.URLRepository{
-				DBHandler: &infrastructure.MySQLURLDBHandler{
-					Conn:   db,
-					Logger: &logger.SimpleStdLogger{},
-				},
-				Logger: &logger.SimpleStdLogger{},
+				DBHandler: dbHandler,
+				Logger:    &logger.SimpleStdLogger{},
 			},
 			HashGenerator: &domain.SnowFlakeHashGenerator{
 				IDGenerator: domain.SnowFlake{Node: node},

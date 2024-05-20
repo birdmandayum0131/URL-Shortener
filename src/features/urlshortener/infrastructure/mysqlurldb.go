@@ -4,16 +4,36 @@ import (
 	"fmt"
 	"logger"
 	"reflect"
+	"strings"
 	"urlshortener/interfaces/models"
 	"urlshortener/interfaces/schemas"
-	"strings"
 
+	"github.com/go-sql-driver/mysql"
 	"github.com/jmoiron/sqlx"
 )
 
 type MySQLURLDBHandler struct {
 	Conn   *sqlx.DB
 	Logger logger.Logger
+}
+
+// Initialize mysql url database
+func (dbHandler *MySQLURLDBHandler) Init() {
+	// * create url table
+	// TODO: refactor the sql statement to better write style
+	var schema = `
+	CREATE TABLE url_shortener.urlmappings (
+		id BIGINT NOT NULL AUTO_INCREMENT,
+		shortURL VARCHAR(64) NULL,
+		longURL VARCHAR(2048) NULL,
+		PRIMARY KEY (id))`
+
+	_, err := dbHandler.Conn.Exec(schema)
+	// * check if table is created
+	if err != nil && !(&mysql.MySQLError{Number: 1050}).Is(err) {
+		// * panic if error not caused by table already created
+		panic(err.Error())
+	}
 }
 
 // Implmentation of URL insert operation
