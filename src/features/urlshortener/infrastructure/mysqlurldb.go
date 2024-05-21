@@ -18,7 +18,7 @@ type MySQLURLDBHandler struct {
 }
 
 // Initialize mysql url database
-func (dbHandler *MySQLURLDBHandler) Init() {
+func (dbHandler *MySQLURLDBHandler) Init() error {
 	// * create url table
 	// TODO: refactor the sql statement to better write style
 	var schema = `
@@ -31,8 +31,8 @@ func (dbHandler *MySQLURLDBHandler) Init() {
 	_, err := dbHandler.Conn.Exec(schema)
 	// * check if table is created
 	if err != nil && !(&mysql.MySQLError{Number: 1050}).Is(err) {
-		// * panic if error not caused by table already created
-		panic(err.Error())
+		// * return if error not caused by table already created
+		return fmt.Errorf("Failed to create url table: %v", err)
 	}
 }
 

@@ -1,8 +1,10 @@
 package main
 
 import (
+	"errutil"
 	"fmt"
 	"logger"
+	"os"
 	"urlshortener/domain"
 	"urlshortener/infrastructure"
 	"urlshortener/interfaces/repositories"
@@ -13,54 +15,64 @@ import (
 	"github.com/gin-gonic/gin"
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/jmoiron/sqlx"
+	"gopkg.in/yaml.v3"
 
 	handlers "urlshortener/interfaces/rest/handlers"
 )
 
 func main() {
-	// TODO: refactor this to config file
-	dbConfig := infrastructure.DBConfig{
-		Host:     "db",
-		Port:     3306,
-		User:     "root",
-		Password: "password",
-		Database: "url_shortener",
-		Driver:   "mysql",
-	}
+	// * load configs
+	dbConfig, err := loadConfigs()
+	println("Load config success!")
+	errutil.PanicIfError(err)
 
 	// * Initialize DB
-	dbHandler := initDB(dbConfig)
+	dbHandler, err := initDB(dbConfig)
+	errutil.PanicIfError(err)
+	println("Success to connect to MySQL!")
 	defer dbHandler.Conn.Close()
 
 	// * Initialize SnowFlake Node
-	node := initNode()
+	node, err := initNode()
+	println("Snowflake init success!")
+	errutil.PanicIfError(err)
 
 	// * Initialize restful handler
 	handler := createHandler(dbHandler, node)
 
 	// * Setup router
 	app := SetupRouter(handler)
-
-	err := app.Run(":8000")
-	if err != nil {
-		panic(err.Error())
-	}
+	err = app.Run(":8000")
+	errutil.PanicIfError(err)
 }
 
 // TODO: maybe we can refactor these setup/init functions with better code style
 
-func SetupRouter(handler *handlers.URLHandler) *gin.Engine {
-	router := gin.Default()
-	routes.InitUrlRoutes(router, handler)
-	return router
+func loadConfigs() (infrastructure.DBConfig, error) {
+	var dbConfig infrastructure.DBConfig
+
+	// * load config files
+	cfgFile, err := os.ReadFile("configs/database.yaml")
+	if err != nil {
+		return dbConfig, fmt.Errorf("Failed to read database yaml: %v", err)
+	}
+
+	// * parse config data to dbConfig
+	envCfg := os.ExpandEnv(string(cfgFile))
+	err = yaml.Unmarshal([]byte(envCfg), &dbConfig)
+	if err != nil {
+		return dbConfig, fmt.Errorf("Failed parse config data to db config: %v", err)
+	}
+
+	return dbConfig, nil
 }
 
-func initDB(config infrastructure.DBConfig) *infrastructure.MySQLURLDBHandler {
+func initDB(config infrastructure.DBConfig) (*infrastructure.MySQLURLDBHandler, error) {
 	// * Connect to DB
 	dbSource := fmt.Sprintf("%s:%s@tcp(%s:%d)/%s", config.User, config.Password, config.Host, config.Port, config.Database)
 	db, err := sqlx.Open(config.Driver, dbSource)
 	if err != nil {
-		panic(err.Error())
+		return nil, fmt.Errorf("Fail to connect to url db: %v", err)
 	}
 
 	// * Create tables
@@ -68,18 +80,19 @@ func initDB(config infrastructure.DBConfig) *infrastructure.MySQLURLDBHandler {
 		Conn:   db,
 		Logger: &logger.SimpleStdLogger{},
 	}
-	dbHandler.Init()
-
-	println("Success to connect to MySQL!")
-	return dbHandler
+	err = dbHandler.Init()
+	if err != nil {
+		return nil, fmt.Errorf("Fail to initialize url db: %v", err)
+	}
+	return dbHandler, nil
 }
 
-func initNode() *snowflake.Node {
+func initNode() (*snowflake.Node, error) {
 	node, err := snowflake.NewNode(1)
 	if err != nil {
-		panic(err.Error())
+		return nil, fmt.Errorf("Failed to create snowflake node: %v", err)
 	}
-	return node
+	return node, nil
 }
 
 func createHandler(dbHandler repositories.URLDBHandler, node *snowflake.Node) *handlers.URLHandler {
@@ -96,4 +109,10 @@ func createHandler(dbHandler repositories.URLDBHandler, node *snowflake.Node) *h
 		},
 		Logger: &logger.SimpleStdLogger{},
 	}
+}
+
+func SetupRouter(handler *handlers.URLHandler) *gin.Engine {
+	router := gin.Default()
+	routes.InitUrlRoutes(router, handler)
+	return router
 }
