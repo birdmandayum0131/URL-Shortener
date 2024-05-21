@@ -2,6 +2,7 @@ package main
 
 import (
 	"errutil"
+	"flag"
 	"fmt"
 	"logger"
 	"os"
@@ -20,9 +21,13 @@ import (
 	handlers "urlshortener/interfaces/rest/handlers"
 )
 
+var configPath = flag.String("config", "./configs/database.yaml", "config files path")
+
 func main() {
+	flag.Parse()
+
 	// * load configs
-	dbConfig, err := loadConfigs()
+	dbConfig, err := loadConfigs(*configPath)
 	println("Load config success!")
 	errutil.PanicIfError(err)
 
@@ -48,11 +53,11 @@ func main() {
 
 // TODO: maybe we can refactor these setup/init functions with better code style
 
-func loadConfigs() (infrastructure.DBConfig, error) {
+func loadConfigs(configPath string) (infrastructure.DBConfig, error) {
 	var dbConfig infrastructure.DBConfig
 
 	// * load config files
-	cfgFile, err := os.ReadFile("configs/database.yaml")
+	cfgFile, err := os.ReadFile(configPath)
 	if err != nil {
 		return dbConfig, fmt.Errorf("Failed to read database yaml: %v", err)
 	}
