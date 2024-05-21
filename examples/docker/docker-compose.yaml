@@ -8,6 +8,9 @@ services:
     build:
       context: ../..
       dockerfile: ./docker/Dockerfile
+    environment:
+      DB_USER: ${MYSQL_USER}
+      DB_PASSWORD: ${MYSQL_PASSWORD}
     depends_on:
       - db
     expose:
