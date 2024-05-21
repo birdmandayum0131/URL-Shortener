@@ -43,14 +43,9 @@ func (handler *URLHandler) GetURLHandler(c *gin.Context) {
 
 	longURL, err := handler.URLInteractor.GetURL(shortURL)
 	if err != nil {
-		handler.Logger.Log(err.Error())
+		_ = handler.Logger.Log(err.Error())
 		return
 	}
 
-	response := schemas.GetURLResponse{
-		LongURL:  longURL,
-		ShortURL: shortURL,
-	}
-
-	c.IndentedJSON(http.StatusFound, response)
+	c.Redirect(http.StatusFound, longURL)
 }
