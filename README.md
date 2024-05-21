@@ -1,4 +1,4 @@
-# Url_Shortener
+# URL-Shortener
 
 A repository that can host a URL shortener service.
 
