@@ -1,0 +1,6 @@
+host:     "db"
+port:     3306
+user:     ${DB_USER}
+password: ${DB_PASSWORD}
+database: "url_shortener"
+driver:   "mysql"

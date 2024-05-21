@@ -1,7 +1,8 @@
 go 1.22.2
 
 use (
-	./src/libs/snowflake
-	./src/libs/utility/logger
 	./src/features/urlshortener
+	./src/libs/snowflake
+	./src/libs/utility/errutil
+	./src/libs/utility/logger
 )

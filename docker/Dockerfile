@@ -11,7 +11,10 @@ RUN ./docker/build.sh && \
 # Remove the project folder after build
 WORKDIR /home/urlserver
 RUN rm -r urlproject
+# Copy config files to the image
+RUN mkdir -p /etc/urlshortener
+COPY ./configs /etc/urlshortener
 # Switch to the non-root user
 USER urlserver
 EXPOSE 8000
-CMD ["./urlshortener"]
+CMD ["./urlshortener", "-config=/etc/urlshortener/database.yaml"]

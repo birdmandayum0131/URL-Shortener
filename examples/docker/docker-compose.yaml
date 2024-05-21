@@ -8,6 +8,9 @@ services:
     build:
       context: ../..
       dockerfile: ./docker/Dockerfile
+    environment:
+      DB_USER: root
+      DB_PASSWORD: ${MYSQL_PASSWORD:-password}
     depends_on:
       - db
     expose:
@@ -16,7 +19,7 @@ services:
     image: mysql
     restart: always
     environment:
-      MYSQL_ROOT_PASSWORD: password
+      MYSQL_ROOT_PASSWORD: ${MYSQL_PASSWORD:-password}
       MYSQL_DATABASE: url_shortener
     expose:
       - 3306
