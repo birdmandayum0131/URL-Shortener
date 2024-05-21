@@ -39,19 +39,34 @@ You can just clone the repository.
 ```
 git clone https://github.com/birdmandayum0131/Url_Shortener.git
 ```
-And run the docker compose example.
-```
-sh ./examples/docker/docker-run.sh
-```
-if you have a gateway container(docker network) running, like nginx server with https.
-you can join the network by setup the environment variable of `GATEWAY_NETWORK` which called by docker example.
-
+#### docker
+  run the docker compose example.
+  ```
+  sh ./examples/docker/docker-run.sh
+  ```
+  if you have a gateway container(docker network) running, like nginx server with https.
+  you can join the network by setup the environment variable of `GATEWAY_NETWORK` which called by docker example.
+#### windows
+  If you don't want use docker, and you have a mysql server exist.  
+  
+  1. Setup necessary environment variable or provide a env.cmd under examples/windows.  
+      
+      You can write in format like:
+      ```
+      export DB_USER=${USERNAME}
+      export DB_PASSWORD=${PASSWORD}
+      ```
+  2. run windows example  
+      ```
+      sh ./examples/windows/run.sh
+      ```  
 ## Timeline
   - start the project `2024/04/16`
   - successfully complete the basic implementation `2024/04/18`
   - studying and refactor it to clean architecture ~ `2024/05/09`
   - add docker support to this project `2024/05/10`
   - add docker compose example to Host a URL shortener service from scratch `2024/05/16`
+  - refactor configs to yaml file `2024/05/21`
     
 ## Roadmap
   - [x] Clean Architecture
