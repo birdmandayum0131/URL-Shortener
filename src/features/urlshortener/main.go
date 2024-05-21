@@ -39,19 +39,18 @@ func main() {
 
 	// * Initialize SnowFlake Node
 	node, err := initNode()
+	snowflake := domain.SnowFlake{Node: node}
 	println("Snowflake init success!")
 	errutil.PanicIfError(err)
 
 	// * Initialize restful handler
-	handler := createHandler(dbHandler, node)
+	handler := createHandler(dbHandler, snowflake)
 
 	// * Setup router
 	app := SetupRouter(handler)
 	err = app.Run(":8000")
 	errutil.PanicIfError(err)
 }
-
-// TODO: maybe we can refactor these setup/init functions with better code style
 
 func loadConfigs(configPath string) (infrastructure.DBConfig, error) {
 	var dbConfig infrastructure.DBConfig
@@ -100,20 +99,14 @@ func initNode() (*snowflake.Node, error) {
 	return node, nil
 }
 
-func createHandler(dbHandler repositories.URLDBHandler, node *snowflake.Node) *handlers.URLHandler {
-	return &handlers.URLHandler{
-		URLInteractor: services.URLEntryInteractor{
-			URLRepository: &repositories.URLRepository{
-				DBHandler: dbHandler,
-				Logger:    &logger.SimpleStdLogger{},
-			},
-			HashGenerator: &domain.SnowFlakeHashGenerator{
-				IDGenerator: domain.SnowFlake{Node: node},
-			},
-			Logger: &logger.SimpleStdLogger{},
-		},
-		Logger: &logger.SimpleStdLogger{},
-	}
+func createHandler(dbHandler repositories.URLDBHandler, snowflake domain.SnowFlake) *handlers.URLHandler {
+	logger := &logger.SimpleStdLogger{}
+
+	urlRepo := &repositories.URLRepository{DBHandler: dbHandler, Logger: logger}
+	hashGen := &domain.SnowFlakeHashGenerator{IDGenerator: snowflake}
+	urlItr := services.URLEntryInteractor{URLRepository: urlRepo, HashGenerator: hashGen, Logger: logger}
+
+	return &handlers.URLHandler{URLInteractor: urlItr, Logger: logger}
 }
 
 func SetupRouter(handler *handlers.URLHandler) *gin.Engine {
