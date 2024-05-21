@@ -34,6 +34,8 @@ func (dbHandler *MySQLURLDBHandler) Init() error {
 		// * return if error not caused by table already created
 		return fmt.Errorf("Failed to create url table: %v", err)
 	}
+
+	return nil
 }
 
 // Implmentation of URL insert operation
