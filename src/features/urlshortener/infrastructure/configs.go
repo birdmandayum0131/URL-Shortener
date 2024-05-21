@@ -1,10 +1,10 @@
 package infrastructure
 
 type DBConfig struct {
-	Host     string
-	Port     int
+	Host     string	`yaml:"host"`
+	Port     int 	`yaml:"port"`
 	User     string
 	Password string
-	Database string
-	Driver   string
+	Database string	`yaml:"database"`
+	Driver   string	`yaml:"driver"`
 }
