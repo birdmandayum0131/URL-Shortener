@@ -11,9 +11,7 @@ func FieldString(fieldStruct interface{}) string {
 	fieldArray := make([]string, 0)
 	// * iterate all fields, if not empty, append to filterStrings
 	for i := 0; i < fields.NumField(); i++ {
-		if !fields.Field(i).IsZero() {
-			fieldArray = append(fieldArray, types.Field(i).Tag.Get("db"))
-		}
+		fieldArray = append(fieldArray, types.Field(i).Tag.Get("db"))
 	}
 	return strings.Join(fieldArray, ", ")
 }
