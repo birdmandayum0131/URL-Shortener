@@ -1,10 +1,9 @@
 package infrastructure
 
 import (
+	"dbutil"
 	"fmt"
 	"logger"
-	"reflect"
-	"strings"
 	"urlshortener/interfaces/models"
 	"urlshortener/interfaces/schemas"
 
@@ -63,30 +62,19 @@ func (dbHandler *MySQLURLDBHandler) Query(query models.URLEntry) (models.URLEntr
 		ShortURL: query.ShortURL,
 		LongURL:  query.LongURL,
 	}
-	fields := reflect.ValueOf(queryModel)
-	types := fields.Type()
-	filterStrings := make([]string, 0)
-	// * iterate all fields, if not empty, append to filterStrings
-	for i := 0; i < fields.NumField(); i++ {
-		if !fields.Field(i).IsZero() {
-			var compareString string
-			if types.Field(i).Type == reflect.TypeOf("") {
-				compareString = "%s = '%s'"
-			} else {
-				compareString = "%s = %s"
-			}
-			filterStrings = append(filterStrings, fmt.Sprintf(compareString, types.Field(i).Tag.Get("db"), fields.Field(i)))
-		}
-	}
-	// TODO: refactor the sql filter statement to other place
-	filterString := strings.Join(filterStrings, " AND ")
 
-	results, err := dbHandler.Conn.Queryx(fmt.Sprintf("SELECT id, shortURL, longURL FROM urlmappings WHERE %s", filterString))
+	filterString := dbutil.FilterString(queryModel)
+
+	queryString := dbutil.SelectFields("urlmappings", queryModel, filterString)
+	
+	// * Execute query
+	results, err := dbHandler.Conn.Queryx(queryString)
 	if err != nil {
 		dbHandler.Logger.Log(err.Error())
 		return models.URLEntry{}, err
 	}
 
+	// * If query success
 	if results.Next() {
 		var entry schemas.MySQLURLEntry
 		results.StructScan(&entry)
@@ -98,3 +86,4 @@ func (dbHandler *MySQLURLDBHandler) Query(query models.URLEntry) (models.URLEntr
 	}
 	return models.URLEntry{}, nil
 }
+
