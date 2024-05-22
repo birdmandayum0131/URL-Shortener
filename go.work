@@ -3,6 +3,7 @@ go 1.22.2
 use (
 	./src/features/urlshortener
 	./src/libs/snowflake
+	./src/libs/utility/dbutil
 	./src/libs/utility/errutil
 	./src/libs/utility/logger
 )
