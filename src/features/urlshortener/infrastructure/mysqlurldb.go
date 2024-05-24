@@ -69,6 +69,7 @@ func (dbHandler *MySQLURLDBHandler) Query(query models.URLEntry) (models.URLEntr
 	
 	// * Execute query
 	results, err := dbHandler.Conn.Queryx(queryString)
+	defer results.Close()
 	if err != nil {
 		dbHandler.Logger.Log(err.Error())
 		return models.URLEntry{}, err
