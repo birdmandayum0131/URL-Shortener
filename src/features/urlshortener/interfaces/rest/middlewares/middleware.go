@@ -2,8 +2,8 @@ package middlewares
 
 import "github.com/gin-gonic/gin"
 
-func URLMiddlewares() []gin.HandlerFunc {
+func URLMiddlewares(r *gin.Engine) []gin.HandlerFunc {
 	middlewares := make([]gin.HandlerFunc, 0)
-	middlewares = append(middlewares, URLShortenerMiddleware())
+	middlewares = append(middlewares, URLShortenerMiddleware(r))
 	return middlewares
 }
