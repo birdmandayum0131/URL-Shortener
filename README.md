@@ -55,6 +55,8 @@ git clone https://github.com/birdmandayum0131/Url_Shortener.git
       ```
       export DB_USER=${USERNAME}
       export DB_PASSWORD=${PASSWORD}
+      export DB_HOST=localhost
+      export DB_PORT=3306
       ```
   2. run windows example  
       ```
