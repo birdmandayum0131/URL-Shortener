@@ -1,6 +1,10 @@
-host:     "db"
-port:     3306
-user:     ${DB_USER}
+host: ${DB_HOST}
+port: ${DB_PORT}
+user: ${DB_USER}
 password: ${DB_PASSWORD}
 database: "url_shortener"
-driver:   "mysql"
+driver: "mysql"
+maxIdleConns: 1000
+maxOpenConns: 1000
+connMaxIdleTime: 5
+connMaxLifeTime: 0
