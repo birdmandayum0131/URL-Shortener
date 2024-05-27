@@ -4,20 +4,27 @@ import (
 	"dbutil"
 	"fmt"
 	"logger"
+	"time"
 	"urlshortener/interfaces/models"
 	"urlshortener/interfaces/schemas"
-
 	"github.com/go-sql-driver/mysql"
 	"github.com/jmoiron/sqlx"
 )
 
 type MySQLURLDBHandler struct {
-	Conn   *sqlx.DB
+	conn   *sqlx.DB
 	Logger logger.Logger
 }
 
 // Initialize mysql url database
-func (dbHandler *MySQLURLDBHandler) Init() error {
+func (dbHandler *MySQLURLDBHandler) Init(dbConfig DBConfig, poolConfig PoolConfig) error {
+	// * load configs
+	err := dbHandler.loadDBConfig(dbConfig)
+	if err != nil {
+		return fmt.Errorf("Fail to init db: %v", err)
+	}
+	dbHandler.loadPoolConfig(poolConfig)
+
 	// * create url table
 	// TODO: refactor the sql statement to better write style
 	var schema = `
@@ -27,7 +34,7 @@ func (dbHandler *MySQLURLDBHandler) Init() error {
 		longURL VARCHAR(2048) NULL,
 		PRIMARY KEY (id))`
 
-	_, err := dbHandler.Conn.Exec(schema)
+	_, err = dbHandler.conn.Exec(schema)
 	// * check if table is created
 	if err != nil && !(&mysql.MySQLError{Number: 1050}).Is(err) {
 		// * return if error not caused by table already created
@@ -48,7 +55,7 @@ func (dbHandler *MySQLURLDBHandler) Insert(entry models.URLEntry) error {
 	sqlStatement := `
 INSERT INTO urlmappings (shortURL, longURL)
 VALUES (:shortURL, :longURL)`
-	_, err := dbHandler.Conn.NamedExec(sqlStatement, newEntry)
+	_, err := dbHandler.conn.NamedExec(sqlStatement, newEntry)
 	if err != nil {
 		dbHandler.Logger.Log(err.Error())
 		return err
@@ -66,9 +73,9 @@ func (dbHandler *MySQLURLDBHandler) Query(query models.URLEntry) (models.URLEntr
 	filterString := dbutil.FilterString(queryModel)
 
 	queryString := dbutil.SelectFields("urlmappings", queryModel, filterString)
-	
+
 	// * Execute query
-	results, err := dbHandler.Conn.Queryx(queryString)
+	results, err := dbHandler.conn.Queryx(queryString)
 	defer results.Close()
 	if err != nil {
 		dbHandler.Logger.Log(err.Error())
@@ -88,3 +95,24 @@ func (dbHandler *MySQLURLDBHandler) Query(query models.URLEntry) (models.URLEntr
 	return models.URLEntry{}, nil
 }
 
+func (dbHandler *MySQLURLDBHandler) Close() error {
+	return dbHandler.conn.Close()
+}
+
+func (dbHandler *MySQLURLDBHandler) loadDBConfig(config DBConfig) error {
+	// * Connect to DB
+	dbSource := fmt.Sprintf("%s:%s@tcp(%s:%d)/%s", config.User, config.Password, config.Host, config.Port, config.Database)
+	db, err := sqlx.Open(config.Driver, dbSource)
+	if err != nil {
+		return fmt.Errorf("Fail to load db config: %v", err)
+	}
+	dbHandler.conn = db
+	return nil
+}
+
+func (dbHandler *MySQLURLDBHandler) loadPoolConfig(config PoolConfig) {
+	dbHandler.conn.SetMaxIdleConns(config.MaxIdleConns)
+	dbHandler.conn.SetMaxOpenConns(config.MaxOpenConns)
+	dbHandler.conn.SetConnMaxIdleTime(time.Duration(config.ConnMaxIdleTime))
+	dbHandler.conn.SetConnMaxLifetime(time.Duration(config.ConnMaxLifetime))
+}
