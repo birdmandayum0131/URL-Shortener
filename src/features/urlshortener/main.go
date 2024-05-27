@@ -10,6 +10,7 @@ import (
 	"urlshortener/domain"
 	"urlshortener/infrastructure"
 	"urlshortener/interfaces/repositories"
+	"urlshortener/interfaces/rest/middlewares"
 	"urlshortener/interfaces/rest/routes"
 	"urlshortener/services"
 
@@ -103,8 +104,8 @@ func createHandler(dbHandler repositories.URLDBHandler, snowflake domain.SnowFla
 	return &handlers.URLHandler{URLInteractor: urlItr, Logger: logger}
 }
 
-func SetupRouter(handler *handlers.URLHandler) *gin.Engine {
+func SetupRouter(middlewares []gin.HandlerFunc, handler *handlers.URLHandler) *gin.Engine {
 	router := gin.Default()
-	routes.InitUrlRoutes(router, handler)
+	routes.InitUrlRoutes(router, middlewares, handler)
 	return router
 }
