@@ -8,3 +8,10 @@ type DBConfig struct {
 	Database string	`yaml:"database"`
 	Driver   string	`yaml:"driver"`
 }
+
+type PoolConfig struct {
+	MaxIdleConns int `yaml:"maxIdleConns"`
+	MaxOpenConns int `yaml:"maxOpenConns"`
+	ConnMaxIdleTime int64 `yaml:"connMaxIdleTime"`
+	ConnMaxLifetime int64 `yaml:"connMaxLifetime"`
+}

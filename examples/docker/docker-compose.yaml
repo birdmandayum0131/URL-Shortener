@@ -11,6 +11,8 @@ services:
     environment:
       DB_USER: root
       DB_PASSWORD: ${MYSQL_PASSWORD:-password}
+      DB_HOST: db
+      DB_PORT: 3306
     depends_on:
       - db
     expose:
