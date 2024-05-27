@@ -10,7 +10,6 @@ import (
 	"urlshortener/domain"
 	"urlshortener/infrastructure"
 	"urlshortener/interfaces/repositories"
-	"urlshortener/interfaces/rest/middlewares"
 	"urlshortener/interfaces/rest/routes"
 	"urlshortener/services"
 
@@ -46,11 +45,8 @@ func main() {
 	// * Initialize restful handler
 	handler := createHandler(dbHandler, snowflake)
 
-	// * Load middlewares
-	middlewares := middlewares.URLMiddlewares()
-
 	// * Setup router
-	app := SetupRouter(middlewares, handler)
+	app := SetupRouter(nil, handler)
 	err = app.Run(":8000")
 	errutil.PanicIfError(err)
 }
