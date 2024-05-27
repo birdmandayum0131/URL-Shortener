@@ -3,8 +3,8 @@ package services
 import (
 	"errors"
 	"fmt"
-	"urlshortener/domain"
 	"logger"
+	"urlshortener/domain"
 )
 
 //TODO: refactor error handling code snippets to a package
@@ -18,6 +18,11 @@ type URLEntryInteractor struct {
 
 // Find the original url that corresponding to.
 func (interactor *URLEntryInteractor) GetURL(shortURL string) (string, error) {
+	// * check shortURL length is legal
+	if len(shortURL) > 7 || len(shortURL) < 1 {
+		return "", errors.New("Expected url shorter than 7 characters")
+	}
+
 	queryEntry := domain.URLEntry{ShortURL: shortURL}
 	entry, err := interactor.URLRepository.Get(queryEntry)
 	if err != nil {
