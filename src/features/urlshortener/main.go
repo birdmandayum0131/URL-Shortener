@@ -5,7 +5,6 @@ import (
 	"errutil"
 	"flag"
 	"fmt"
-	"logger"
 	"os"
 	"urlshortener/domain"
 	"urlshortener/infrastructure"
@@ -74,7 +73,7 @@ func loadConfigs(configPath string) (infrastructure.DBConfig, infrastructure.Poo
 }
 
 func initDB(dbConfig infrastructure.DBConfig, poolConfig infrastructure.PoolConfig) (*infrastructure.MySQLURLDBHandler, error) {
-	dbHandler := &infrastructure.MySQLURLDBHandler{Logger: &logger.SimpleStdLogger{}}
+	dbHandler := &infrastructure.MySQLURLDBHandler{}
 	err := dbHandler.Init(dbConfig, poolConfig)
 	if err != nil {
 		return nil, fmt.Errorf("Fail to initialize url db: %v", err)
@@ -91,13 +90,10 @@ func initNode() (*snowflake.Node, error) {
 }
 
 func createHandler(dbHandler repositories.URLDBHandler, snowflake domain.SnowFlake) *handlers.URLHandler {
-	logger := &logger.SimpleStdLogger{}
-
-	urlRepo := &repositories.URLRepository{DBHandler: dbHandler, Logger: logger}
+	urlRepo := &repositories.URLRepository{DBHandler: dbHandler}
 	hashGen := &domain.SnowFlakeHashGenerator{IDGenerator: snowflake}
-	urlItr := services.URLEntryInteractor{URLRepository: urlRepo, HashGenerator: hashGen, Logger: logger}
-
-	return &handlers.URLHandler{URLInteractor: urlItr, Logger: logger}
+	urlItr := services.URLEntryInteractor{URLRepository: urlRepo, HashGenerator: hashGen}
+	return &handlers.URLHandler{URLInteractor: urlItr}
 }
 
 func SetupRouter(middlewares []gin.HandlerFunc, handler *handlers.URLHandler) *gin.Engine {
