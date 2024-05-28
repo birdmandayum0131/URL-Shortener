@@ -1,7 +1,7 @@
 package handlers
 
 import (
-	"logger"
+	"fmt"
 	"net/http"
 	schemas "urlshortener/interfaces/schemas/api"
 	"urlshortener/services"
@@ -12,7 +12,6 @@ import (
 // class to handle url shorten tasks
 type URLHandler struct {
 	URLInteractor services.URLEntryInteractor
-	Logger        logger.Logger
 }
 
 // Create a new url entry
@@ -20,13 +19,15 @@ func (handler *URLHandler) CreateURLHandler(c *gin.Context) {
 	var request schemas.CreateURLRequest
 	// Call BindJSON to bind the received JSON request
 	if err := c.Bind(&request); err != nil {
-		handler.Logger.Log(err.Error())
+		msg := fmt.Sprintf("Invalid request format: %v", err)
+		c.JSON(http.StatusBadRequest, gin.H{"error": msg})
 		return
 	}
 
 	shortURL, err := handler.URLInteractor.CreateEntry(request.LongURL)
 	if err != nil {
-		handler.Logger.Log(err.Error())
+		msg := fmt.Sprintf("Internal server error: %v", err)
+		c.JSON(http.StatusInternalServerError, gin.H{"error": msg})
 		return
 	}
 
@@ -43,7 +44,8 @@ func (handler *URLHandler) GetURLHandler(c *gin.Context) {
 
 	longURL, err := handler.URLInteractor.GetURL(shortURL)
 	if err != nil {
-		_ = handler.Logger.Log(err.Error())
+		msg := fmt.Sprintf("Internal server error: %v", err)
+		c.JSON(http.StatusInternalServerError, gin.H{"error": msg})
 		return
 	}
 

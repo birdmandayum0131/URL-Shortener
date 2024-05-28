@@ -3,17 +3,15 @@ package infrastructure
 import (
 	"dbutil"
 	"fmt"
-	"logger"
+	"github.com/go-sql-driver/mysql"
+	"github.com/jmoiron/sqlx"
 	"time"
 	"urlshortener/interfaces/models"
 	"urlshortener/interfaces/schemas"
-	"github.com/go-sql-driver/mysql"
-	"github.com/jmoiron/sqlx"
 )
 
 type MySQLURLDBHandler struct {
-	conn   *sqlx.DB
-	Logger logger.Logger
+	conn *sqlx.DB
 }
 
 // Initialize mysql url database
@@ -57,8 +55,7 @@ INSERT INTO urlmappings (shortURL, longURL)
 VALUES (:shortURL, :longURL)`
 	_, err := dbHandler.conn.NamedExec(sqlStatement, newEntry)
 	if err != nil {
-		dbHandler.Logger.Log(err.Error())
-		return err
+		return fmt.Errorf("Fail to insert url entry: %v", err)
 	}
 	return nil
 }
@@ -76,16 +73,19 @@ func (dbHandler *MySQLURLDBHandler) Query(query models.URLEntry) (models.URLEntr
 
 	// * Execute query
 	results, err := dbHandler.conn.Queryx(queryString)
-	defer results.Close()
 	if err != nil {
-		dbHandler.Logger.Log(err.Error())
-		return models.URLEntry{}, err
+		return models.URLEntry{}, fmt.Errorf("Fail to query url entry: %v", err)
 	}
+	defer results.Close()
 
 	// * If query success
 	if results.Next() {
 		var entry schemas.MySQLURLEntry
-		results.StructScan(&entry)
+		err = results.StructScan(&entry)
+		if err != nil {
+			return models.URLEntry{}, fmt.Errorf("Failed when try to scanning result: %v", err)
+		}
+
 		return models.URLEntry{
 			ID:       entry.ID,
 			ShortURL: entry.ShortURL,
