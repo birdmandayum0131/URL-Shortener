@@ -1,7 +1,7 @@
 package repositories
 
 import (
-	"logger"
+	"fmt"
 	"urlshortener/domain"
 	"urlshortener/interfaces/models"
 )
@@ -15,7 +15,6 @@ type URLDBHandler interface {
 // class that act as a interface between application and database
 type URLRepository struct {
 	DBHandler URLDBHandler
-	Logger    logger.Logger
 }
 
 // store url entry into database
@@ -27,8 +26,7 @@ func (repo *URLRepository) Store(urlEntry domain.URLEntry) error {
 
 	err := repo.DBHandler.Insert(entry)
 	if err != nil {
-		repo.Logger.Log(err.Error())
-		return err
+		return fmt.Errorf("Fail when insert url entry from db handler: %v", err)
 	}
 	return nil
 }
@@ -42,8 +40,7 @@ func (repo *URLRepository) Get(query domain.URLEntry) (domain.URLEntry, error) {
 
 	result, err := repo.DBHandler.Query(queryModel)
 	if err != nil {
-		repo.Logger.Log(err.Error())
-		return domain.URLEntry{}, err
+		return domain.URLEntry{}, fmt.Errorf("Fail when query url entry from db handler: %v", err)
 	}
 
 	entry := domain.URLEntry{
